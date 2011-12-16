@@ -87,11 +87,12 @@ function sendData (t, mail) {
         .seq(function () {
             mail.from('beep@localhost', this);
         })
-        .seq(function (next) {
+        .seq_(function (next) {
             mail.data(function (err, code, lines) {
-                t.ok(err);
+                t.ok(!err);
                 t.equal(code, 503);
                 t.equal(lines.join(''), 'Bad sequence: RCPT expected');
+                next();
             })
         })
         .seq(function () {
