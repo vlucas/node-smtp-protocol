@@ -242,15 +242,22 @@ client methods
 
 For all `client` methods, `cb(err, code, lines)` fires with the server response.
 
-var stream = smtp.connect(host='localhost', port=25, cb)
---------------------------------------------------------
+var stream = smtp.connect(host='localhost', port=25, options={}, cb)
+--------------------------------------------------------------------
 
 Create a new SMTP client connection.
 
-`host`, `port`, and `cb` are detected by their types in the arguments array so
+`host`, `port`, `options` and `cb` are detected by their types in the arguments array so
 they may be in any order.
 
 You can use unix sockets by supplying a string argument that matches `/^[.\/]/`.
+
+Alternatively supply your own stream as `opts.stream` (the stream must already be connected).
+
+To make a connection using TLS, set `opts.tls` to `true` (for more control you can also assign
+options to pass through to `tls.connect`.)  By default, connections to unauthorized servers
+will be closed and the error reported as `cb(error)` (you can provide your own authorization
+logic as `opts.tls.onSecureConnect`).
 
 `cb(client)` fires when the connection is ready.
 
