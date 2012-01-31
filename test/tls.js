@@ -6,28 +6,27 @@ var test = require('tap').test;
 var serverPort = 8000;
 
 var keys = {
-    key: fs.readFileSync('./keys/server-key.pem'),
-    cert: fs.readFileSync('./keys/server-cert.pem'),
-    ca: fs.readFileSync('./keys/ca.pem')
+    key: fs.readFileSync(__dirname + '/keys/server-key.pem'),
+    cert: fs.readFileSync(__dirname + '/keys/server-cert.pem'),
+    ca: fs.readFileSync(__dirname + '/keys/ca.pem')
 };
 
-server = tls.createServer({key: keys.key, cert: keys.cert});
-
-server.on('secureConnection', function(s) {
-    s.write("220 localhost ESMTP\r\n");
-    s.on('data', function(data) {
-        s.end("421 Service unavailable\r\n");
+function makeServer () {
+    var server = tls.createServer({key: keys.key, cert: keys.cert});
+    server.on('secureConnection', function(s) {
+        s.write("220 localhost ESMTP\r\n");
+        s.on('data', function(data) {
+            s.end("421 Service unavailable\r\n");
+        });
     });
-});
+    return server;
+}
 
 test('TLS - unauthorized', {timeout: 1000}, function(t) {
-
     t.plan(2);
-
-    var options = {
-        tls: true
-    };
-
+    var options = { tls: true };
+    var server = makeServer();
+    
     server.listen(serverPort, function() {
         smtp.connect(serverPort, options, function(err) {
             server.close();
@@ -39,9 +38,9 @@ test('TLS - unauthorized', {timeout: 1000}, function(t) {
 });
 
 test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
-
     t.plan(4);
-
+    
+    var server = makeServer();
     var options = {
         tls: {
             onSecureConnect: function(s) {
@@ -50,7 +49,7 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
             }
         }
     };
-
+    
     server.listen(serverPort, function() {
         smtp.connect(serverPort, options, function(session) {
             server.close();
@@ -66,9 +65,9 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
 });
 
 test('TLS - authorized', {timeout: 1000}, function(t) {
-
     t.plan(4);
-
+    
+    var server = makeServer();
     var options = {
         tls: {
             ca: [ keys.ca ],
@@ -78,9 +77,8 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
             }
         }
     };
-
+    
     server.listen(serverPort, function() {
-
         smtp.connect(serverPort, options, function(session) {
             server.close();
             t.error(session instanceof Error, "connect should succeed");
