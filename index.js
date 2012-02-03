@@ -37,20 +37,31 @@ exports.connect = function () {
         var tlsOpts = options.tls;
         
         if (tlsOpts) {
-            var onSecureConnect = tlsOpts.onSecureConnect;
-            delete tlsOpts.onSecureConnect;
-            
             stream = tls.connect(port, host, tlsOpts, function () {
-                var ok = onSecureConnect
-                    ? onSecureConnect(stream)
-                    : stream.authorized
-                ;
-                
-                if (!ok) {
-                    stream.end();
-                    stream.emit('error', new Error(stream.authorizationError));
+                var pending = stream.listeners('secureConnect').length;
+                var allOk = pending === 0 ? stream.authorized : true;
+                if (pending === 0) done()
+                else {
+                    var ack = {
+                        accept : function (ok) {
+                            allOk = allOk && (ok !== false);
+                            if (--pending === 0) done();
+                        },
+                        reject : function () {
+                            allOk = false;
+                            if (--pending === 0) done();
+                        }
+                    };
+                    stream.emit('secureConnect', stream, ack);
                 }
-                else cb(proto.server(stream));
+                
+                function done () {
+                    if (!allOk) {
+                        stream.end();
+                        stream.emit('error', new Error(stream.authorizationError));
+                    }
+                    else cb(proto.server(stream));
+                }
             });
 
         }

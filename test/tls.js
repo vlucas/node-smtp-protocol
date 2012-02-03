@@ -13,7 +13,7 @@ var keys = {
 
 function makeServer () {
     var server = tls.createServer({key: keys.key, cert: keys.cert});
-    server.on('secureConnection', function(s) {
+    server.on('secureConnection', function (s) {
         s.write("220 localhost ESMTP\r\n");
         s.on('data', function(data) {
             s.end("421 Service unavailable\r\n");
@@ -45,17 +45,8 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
     t.plan(3);
     
     var server = makeServer();
-    var options = {
-        tls: {
-            onSecureConnect: function(s) {
-                t.ok(!s.authorized);
-                return true;
-            }
-        }
-    };
-    
     server.listen(serverPort, function() {
-        var c = smtp.connect(serverPort, options, function (session) {
+        var c = smtp.connect(serverPort, { tls : true }, function (session) {
             server.close();
             session.on('greeting', function (code, messages) {
                 t.equal(code, 220);
@@ -64,6 +55,11 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
                 session.quit();
             })
         });
+        
+        c.on('secureConnect', function (s, ack) {
+            t.ok(!s.authorized);
+            ack.accept();
+        });
     });
 });
 
@@ -71,18 +67,10 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
     t.plan(3);
     
     var server = makeServer();
-    var options = {
-        tls: {
-            ca: [ keys.ca ],
-            onSecureConnect: function(s) {
-                t.ok(s.authorized, "should be authorized");
-                return s.authorized;
-            }
-        }
-    };
+    var options = { tls: { ca: [ keys.ca ] } };
     
     server.listen(serverPort, function() {
-        smtp.connect(serverPort, options, function (session) {
+        var c = smtp.connect(serverPort, options, function (session) {
             server.close();
             
             session.on('greeting', function(code, messages) {
@@ -91,6 +79,12 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
                 t.end();
                 session.quit();
             })
+        });
+        
+        c.on('secureConnect', function (s, ack) {
+            t.ok(s.authorized, "should be authorized");
+            if (s.authorized) ack.accept()
+            else ack.reject()
         });
     });
 });
