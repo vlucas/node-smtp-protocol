@@ -27,53 +27,50 @@ exports.connect = function () {
     var cb = args.function;
     var options = args.object || {};
     
+    var port = args.number || 25;
+    var host = args.string || 'localhost';
+    var tlsOpts = options.tls;
+    
     if (args.string && args.string.match(/^[.\/]/)) {
         // unix socket
         stream = net.createConnection(args.string);
     }
-    else {
-        port = args.number || 25;
-        host = args.string || 'localhost';
-        var tlsOpts = options.tls;
-        
-        if (tlsOpts) {
-            stream = tls.connect(port, host, tlsOpts, function () {
-                var pending = stream.listeners('secureConnect').length;
-                var allOk = pending === 0 ? stream.authorized : true;
-                if (pending === 0) done()
-                else {
-                    var ack = {
-                        accept : function (ok) {
-                            allOk = allOk && (ok !== false);
-                            if (--pending === 0) done();
-                        },
-                        reject : function () {
-                            allOk = false;
-                            if (--pending === 0) done();
-                        }
-                    };
-                    stream.emit('secureConnect', stream, ack);
-                }
-                
-                function done () {
-                    if (!allOk) {
-                        stream.end();
-                        stream.emit('error', new Error(stream.authorizationError));
+    else if (tlsOpts) {
+        stream = tls.connect(port, host, tlsOpts, function () {
+            var pending = stream.listeners('secureConnect').length;
+            var allOk = pending === 0 ? stream.authorized : true;
+            if (pending === 0) done()
+            else {
+                var ack = {
+                    accept : function (ok) {
+                        allOk = allOk && (ok !== false);
+                        if (--pending === 0) done();
+                    },
+                    reject : function () {
+                        allOk = false;
+                        if (--pending === 0) done();
                     }
-                    else cb(proto.server(stream));
+                };
+                stream.emit('secureConnect', stream, ack);
+            }
+            
+            function done () {
+                if (!allOk) {
+                    stream.end();
+                    stream.emit('error', new Error(stream.authorizationError));
                 }
-            });
-
-        }
-        else if (options.stream) {
-            cb(proto.server(options.stream));
-        }
-        else {
-            stream = net.createConnection(port, host);
-            stream.on('connect', function () {
-                cb(proto.server(stream));
-            });
-        }
+                else cb(proto.server(stream));
+            }
+        });
+    }
+    else if (options.stream) {
+        cb(proto.server(options.stream));
+    }
+    else {
+        stream = net.createConnection(port, host);
+        stream.on('connect', function () {
+            cb(proto.server(stream));
+        });
     }
     
     return stream;
