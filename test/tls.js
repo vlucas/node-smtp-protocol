@@ -28,17 +28,21 @@ test('TLS - unauthorized', {timeout: 1000}, function(t) {
     var server = makeServer();
     
     server.listen(serverPort, function() {
-        smtp.connect(serverPort, options, function(err) {
+        var c = smtp.connect(serverPort, options, function (session) {
+            t.fail('connect should have failed');
+        });
+        
+        c.on('error', function (err) {;
             server.close();
-            t.ok(err instanceof Error, "connect should fail");
-            t.equals(err.message, "UNABLE_TO_VERIFY_LEAF_SIGNATURE", "connect should fail");
+            t.ok(err, 'connect should fail');
+            t.equals(err.message, 'UNABLE_TO_VERIFY_LEAF_SIGNATURE');
             t.end();
         });
     });
 });
 
 test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
-    t.plan(4);
+    t.plan(3);
     
     var server = makeServer();
     var options = {
@@ -51,10 +55,9 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
     };
     
     server.listen(serverPort, function() {
-        smtp.connect(serverPort, options, function(session) {
+        var c = smtp.connect(serverPort, options, function (session) {
             server.close();
-            t.error(session instanceof Error, "connect should succeed");
-            session.on('greeting', function(code, messages) {
+            session.on('greeting', function (code, messages) {
                 t.equal(code, 220);
                 t.equal(messages[0], "localhost ESMTP");
                 t.end();
@@ -65,7 +68,7 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
 });
 
 test('TLS - authorized', {timeout: 1000}, function(t) {
-    t.plan(4);
+    t.plan(3);
     
     var server = makeServer();
     var options = {
@@ -79,9 +82,9 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
     };
     
     server.listen(serverPort, function() {
-        smtp.connect(serverPort, options, function(session) {
+        smtp.connect(serverPort, options, function (session) {
             server.close();
-            t.error(session instanceof Error, "connect should succeed");
+            
             session.on('greeting', function(code, messages) {
                 t.equal(code, 220);
                 t.equal(messages[0], "localhost ESMTP");
