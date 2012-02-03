@@ -56,8 +56,8 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
             })
         });
         
-        c.on('secureConnect', function (s, ack) {
-            t.ok(!s.authorized);
+        c.on('secureConnect', function (ack) {
+            t.ok(!c.authorized);
             ack.accept();
         });
     });
@@ -81,9 +81,9 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
             })
         });
         
-        c.on('secureConnect', function (s, ack) {
-            t.ok(s.authorized, "should be authorized");
-            if (s.authorized) ack.accept()
+        c.on('secureConnect', function (ack) {
+            t.ok(c.authorized, "should be authorized");
+            if (c.authorized) ack.accept()
             else ack.reject()
         });
     });

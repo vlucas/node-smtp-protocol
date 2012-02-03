@@ -51,7 +51,7 @@ exports.connect = function () {
                         if (--pending === 0) done();
                     }
                 };
-                stream.emit('secureConnect', stream, ack);
+                stream.emit('secureConnect', ack);
             }
             
             function done () {
