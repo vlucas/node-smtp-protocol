@@ -5,6 +5,8 @@ Implements the smtp protocol for clients and servers.
 
 This module does not relay any messages or perform disk I/O by itself.
 
+[![build status](https://secure.travis-ci.org/substack/node-smtp-protocol.png)](http://travis-ci.org/substack/node-smtp-protocol)
+
 examples
 ========
 
