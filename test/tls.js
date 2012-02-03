@@ -22,7 +22,7 @@ function makeServer () {
     return server;
 }
 
-test('TLS - unauthorized', {timeout: 1000}, function(t) {
+test('TLS - unauthorized', function (t) {
     t.plan(2);
     var options = { tls: true };
     var server = makeServer();
@@ -41,7 +41,7 @@ test('TLS - unauthorized', {timeout: 1000}, function(t) {
     });
 });
 
-test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
+test('TLS - unauthorized with callback', function (t) {
     t.plan(3);
     
     var server = makeServer();
@@ -56,14 +56,14 @@ test('TLS - unauthorized with callback', {timeout: 1000}, function(t) {
             })
         });
         
-        c.on('secureConnect', function (ack) {
+        c.on('secure', function (ack) {
             t.ok(!c.authorized);
             ack.accept();
         });
     });
 });
 
-test('TLS - authorized', {timeout: 1000}, function(t) {
+test('TLS - authorized', function (t) {
     t.plan(3);
     
     var server = makeServer();
@@ -81,7 +81,7 @@ test('TLS - authorized', {timeout: 1000}, function(t) {
             })
         });
         
-        c.on('secureConnect', function (ack) {
+        c.on('secure', function (ack) {
             t.ok(c.authorized, "should be authorized");
             if (c.authorized) ack.accept()
             else ack.reject()
