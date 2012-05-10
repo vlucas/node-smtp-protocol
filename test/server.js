@@ -54,7 +54,7 @@ test('server accept/reject', function (t) {
         
         c.on('end', function () {
             t.equal(script, [
-                '250 localhost',
+                '220 localhost',
                 'helo',
                 '250',
                 'mail from: <beep@localhost>',

@@ -49,7 +49,7 @@ test('bad sequence', function (t) {
         
         c.on('end', function () {
             t.equal(script, [
-                '250 localhost',
+                '220 localhost',
                 'HELO localhost',
                 '250',
                 'MAIL FROM: <beep@localhost>',
