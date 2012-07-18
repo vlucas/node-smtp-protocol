@@ -25,7 +25,7 @@ test('multi-line code parsing', function (t) {
                 else if (cmd.name === 'quit') {
                     t.equal(output[0].name, 'greeting');
                     t.equal(output[0].greeting, 'ehlo');
-                    t.equal(output[0].domain, 'localhost');
+                    t.equal(output[0].hostname , 'localhost');
                     
                     t.equal(output[1].name, 'mail');
                     t.equal(output[1].from, 'beep@example.com');
