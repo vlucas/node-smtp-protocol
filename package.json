@@ -30,9 +30,6 @@
         "chunky" : "0.0.x",
         "seq" : "0.3.x"
     },
-    "engines" : {
-        "node" : ">=0.4.0 < 0.9.0"
-    },
     "license" : "MIT",
     "author" : {
         "name" : "James Halliday",
