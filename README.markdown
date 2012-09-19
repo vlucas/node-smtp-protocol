@@ -156,7 +156,7 @@ MUST call either `ack.accept()` or `ack.reject()`.
 Emitted when `HELO`, `EHLO`, or `LHLO` commands are received.
 
 Read the name of the command with `cmd.greeting`.
-Read the optional domain parameter with `cmd.domain`.
+Read the optional hostname parameter with `cmd.hostname`.
 
 ### 'from', from, ack
 
@@ -214,9 +214,9 @@ Extended recipient data if sent as a string.
 
 The greeting command. One of `'helo'`, `'ehlo'`, or `'lhlo'`.
 
-### req.domain
+### req.hostname
 
-The domain specified in the greeting.
+The hostname specified in the greeting.
 
 server acknowledgements
 =======================
@@ -269,10 +269,10 @@ stream.on('secure', function (ack) {
 })
 ```
 
-client.helo(domain, cb)
+client.helo(hostname, cb)
 -----------------------
 
-Greet the server with the `domain` string.
+Greet the server with the `hostname` string.
 
 `cb(err, code, lines)` fires with the server response.
 
