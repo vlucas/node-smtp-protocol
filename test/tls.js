@@ -35,7 +35,7 @@ test('TLS - unauthorized', function (t) {
         c.on('error', function (err) {;
             server.close();
             t.ok(err, 'connect should fail');
-            t.equals(err.message, 'UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+            t.equals(err.message, 'DEPTH_ZERO_SELF_SIGNED_CERT');
             t.end();
         });
     });
