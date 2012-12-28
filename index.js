@@ -41,8 +41,8 @@ exports.connect = function () {
             var allOk = true;
             if(pending === 0){
                 if(!stream.authorized && tlsOpts.rejectUnauthorized !== false) allOk = false;
-                done();
             }
+            if (pending === 0) done()
             else {
                 var ack = {
                     accept : function (ok) {
