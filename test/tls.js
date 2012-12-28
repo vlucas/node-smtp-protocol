@@ -6,8 +6,8 @@ var test = require('tap').test;
 var serverPort = 8000;
 
 var keys = {
-    key: fs.readFileSync(__dirname + '/keys/server-key.pem'),
-    cert: fs.readFileSync(__dirname + '/keys/server-cert.pem'),
+    key: fs.readFileSync(__dirname + '/keys/key.pem'),
+    cert: fs.readFileSync(__dirname + '/keys/cert.pem'),
     ca: fs.readFileSync(__dirname + '/keys/ca.pem')
 };
 
