@@ -2,11 +2,11 @@ var test = require('tap').test;
 var parser = require('../lib/server/parser');
 
 var chunky = require('chunky');
-var Stream = require('net').Stream;
+var through = require('through');
 
 test('byte parsing', function (t) {
     function check (end) {
-        var stream = new Stream;
+        var stream = through();
         var output = [];
         var data = '', ended = 0;
         
@@ -35,7 +35,7 @@ test('byte parsing', function (t) {
         
         var iv = setInterval(function () {
             var c = chunks.shift();
-            if (c) stream.emit('data', c)
+            if (c) stream.queue(c)
             if (chunks.length === 0) {
                 clearInterval(iv);
                 t.deepEqual(output, [

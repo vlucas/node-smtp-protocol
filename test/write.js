@@ -1,12 +1,10 @@
 var test = require('tap').test;
 var write = require('../lib/server/write');
-var Stream = require('net').Stream;
+var through = require('through');
 
 test('writes', function (t) {
     var output = '';
-    var stream = {
-        write : function (buf) { output += buf }
-    };
+    var stream = through(function (buf) { output += buf });
     
     var w = write(stream);
     w(200, 'ok');
