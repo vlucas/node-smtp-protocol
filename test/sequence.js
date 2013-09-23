@@ -102,15 +102,13 @@ function sendData (t, mail) {
             mail.data(this)
         })
         .seq(function () {
-            var stream = through();
+            var m = mail.message(this);
             setTimeout(function () {
-                stream.queue('Beep boop.\r\n');
+                m.write('Beep boop.\r\n');
             }, 10);
             setTimeout(function () {
-                stream.queue('...I am a computer.');
-                stream.queue(null);
+                m.end('...I am a computer.');
             }, 20);
-            mail.message(stream, this);
         })
         .seq(function () {
             mail.quit(this);
