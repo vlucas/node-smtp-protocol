@@ -1,6 +1,6 @@
 var smtp = require('../');
 var test = require('tap').test;
-var net = require('net');
+var through = require('through');
 
 var seq = require('seq');
 var fs = require('fs');
@@ -102,13 +102,13 @@ function sendData (t, mail) {
             mail.data(this)
         })
         .seq(function () {
-            var stream = new net.Stream;
+            var stream = through();
             setTimeout(function () {
-                stream.emit('data', 'Beep boop.\r\n');
+                stream.queue('Beep boop.\r\n');
             }, 10);
             setTimeout(function () {
-                stream.emit('data', '...I am a computer.');
-                stream.emit('end');
+                stream.queue('...I am a computer.');
+                stream.queue(null);
             }, 20);
             mail.message(stream, this);
         })
