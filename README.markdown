@@ -297,10 +297,15 @@ Tell the server that we are about to transmit data.
 
 `cb(err, code, lines)` fires with the server response.
 
-client.message(stream, cb)
---------------------------
+var stream = client.message(cb)
+-------------------------------
 
-Write a message body from `stream` to the server.
+Return a writable stream to send data to the server in a message body.
+For example, you could do:
+
+``` js
+fs.createReadStream('foo.txt').pipe(client.message());
+```
 
 `cb(err, code, lines)` fires with the server response.
 
