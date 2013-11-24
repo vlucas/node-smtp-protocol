@@ -70,7 +70,7 @@ exports.connect = function () {
         cb(proto.server(options.stream));
     }
     else {
-        stream = net.createConnection(port, host);
+        stream = net.connect(port, host);
         stream.on('connect', function () {
             cb(proto.server(stream));
         });
