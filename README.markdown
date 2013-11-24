@@ -151,6 +151,15 @@ if no listeners are registered.
 If there are any listeners for an acknowledgeable event, exactly one listener
 MUST call either `ack.accept()` or `ack.reject()`.
 
+### 'command', cmd, r
+
+This event fires for every smtp command. `cmd` has the command name as
+`cmd.name` and the `cmd.data` as the command data.
+
+If you want to override the default behavior for a command, call
+`r.preventDefault()`, then call `r.write(code, data)` to write a response and
+`r.next()` when the next command should be processed.
+
 ### 'greeting', cmd, ack
 
 Emitted when `HELO`, `EHLO`, or `LHLO` commands are received.
