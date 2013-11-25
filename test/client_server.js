@@ -51,7 +51,7 @@ test('client/server', function (t) {
             t.equal(script, [
                 '220 localhost',
                 'HELO localhost',
-                '250',
+                '250 localhost',
                 'MAIL FROM: <beep@localhost>',
                 '250',
                 'RCPT TO: <boop@example.com>',
