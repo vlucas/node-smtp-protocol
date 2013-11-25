@@ -39,23 +39,23 @@ exports.connect = function () {
         stream = tls.connect(port, host, tlsOpts, function () {
             var pending = stream.listeners('secure').length;
             var allOk = true;
-            if(pending === 0){
-                if(!stream.authorized && tlsOpts.rejectUnauthorized !== false) allOk = false;
+            if (pending === 0 && !stream.authorized
+            && tlsOpts.rejectUnauthorized !== false) {
+                allOk = false;
             }
-            if (pending === 0) done()
-            else {
-                var ack = {
-                    accept : function (ok) {
-                        allOk = allOk && (ok !== false);
-                        if (--pending === 0) done();
-                    },
-                    reject : function () {
-                        allOk = false;
-                        if (--pending === 0) done();
-                    }
-                };
-                stream.emit('secure', ack);
-            }
+            if (pending === 0) return done()
+            
+            var ack = {
+                accept : function (ok) {
+                    allOk = allOk && (ok !== false);
+                    if (--pending === 0) done();
+                },
+                reject : function () {
+                    allOk = false;
+                    if (--pending === 0) done();
+                }
+            };
+            stream.emit('secure', ack);
             
             function done () {
                 if (!allOk) {
