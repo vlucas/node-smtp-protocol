@@ -6,14 +6,17 @@ var proto = exports.protocol = {
     server : require('./lib/server/proto'),
 };
 
-exports.createServer = function (domain, cb) {
-    if (typeof domain === 'function') {
-        cb = domain;
-        domain = undefined;
+exports.createServer = function (opts, cb) {
+    if (typeof opts === 'string') {
+        opts = { domain: opts };
+    }
+    if (typeof opts === 'function') {
+        cb = opts;
+        opts = {};;
     }
     
     return net.createServer(function (stream) {
-        cb(proto.client(domain, stream));
+        cb(proto.client(opts, stream));
     });
 };
 
