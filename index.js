@@ -14,49 +14,36 @@ exports.createServer = function (opts, cb) {
         cb = opts;
         opts = {};;
     }
-    var tserver = false;
-    if (opts.key || opts.pfx) {
-        tserver = tls.createServer(opts);
-        tserver.on('secureConnection', function (sec) {
-            var req = false;
-console.log('SCONN', sec);
-            //onstream(sec, req);
-        });
-    }
     
-    var server = net.createServer(onstream);
-    var requests = {};
-    var seqNum = 0;
-    
-    function onstream (stream, existingReq) {
-        var req = existingReq || proto.client(opts, stream);
+    return net.createServer(function (stream) {
+        var req = proto.client(opts, stream);
         
         req.on('_tlsNext', function (write) {
-            if (existingReq) {
-                return write(503, 'Bad sequence: already using TLS.');
-            }
-            var s = net.connect(tserver.address().port, '127.0.0.1');
-            s.on('open', function () {
-console.log(s);
-console.log('--------------------------------------');
-            });
-            s.on('error', function (err) {});
+            //return write(503, 'Bad sequence: already using TLS.');
             
-            stream.pipe(s).pipe(stream);
-            write(220, 'Ready to start TLS.');
-            req.emit('tls');
+            var tserver = tls.createServer(opts);
+            tserver.listen(0, '127.0.0.1', function () {
+console.log('LISTENING');
+                var s = net.connect(tserver.address().port, '127.0.0.1');
+                s.on('error', function (err) { stream.end() });
+                s.pipe(stream).pipe(s);
+                write(220, 'Ready to start TLS.');
+            });
+            
+            var index = 0;
+            tserver.on('secureConnection', function (sec) {
+                if (index ++ > 0) return sec.end();
+                console.log('SECURE!!!');
+                
+                req.emit('tls', sec);
+            });
+            stream.on('close', function () {
+                console.log('CLOSED');
+                tserver.close();
+            });
         });
-        if (!existingReq) cb(req);
-    }
-    if (tserver) {
-        server.on('listening', function () {
-            tserver.listen(0, '127.0.0.1');
-        });
-        server.on('close', function () {
-            tserver.close();
-        });
-    }
-    return server;
+        cb(req);
+    });
 };
 
 exports.connect = function () {
