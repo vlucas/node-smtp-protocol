@@ -13,7 +13,7 @@ var keys = {
 };
 
 test('server upgrade to TLS', function (t) {
-    t.plan(5);
+    t.plan(6);
     t.on('end', function () {
         server.close();
     });
@@ -65,7 +65,14 @@ test('server upgrade to TLS', function (t) {
                     ca: keys.ca
                 });
                 sec.pipe(concat(function (body) {
-                    console.log('BODY=', body);
+                    t.deepEqual(body.toString('utf8').split(/\r?\n/), [
+                        '250',
+                        '250',
+                        '354',
+                        '250',
+                        '221 Bye!',
+                        ''
+                    ]);
                 }));
                 sec.write('mail from: <beep@a.com>\n');
                 sec.write('rcpt to: <boop@b.com>\n');
