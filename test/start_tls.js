@@ -22,12 +22,17 @@ test('server upgrade to TLS', function (t) {
     };
     var server = smtp.createServer(opts, function (req) {
         req.on('tls', function () {
-            console.log('UPGRADED!');
-            t.ok(true);
+console.log('TLS');
+            t.ok(true, 'upgraded to tls');
+        });
+        
+        req.on('from', function (from, ack) {
+            t.equal(from, 'beep@a.com');
+            ack.accept();
         });
         
         req.on('to', function (to, ack) {
-            t.equal(to, 'beep@boop');
+            t.equal(to, 'boop@b.com');
             ack.accept();
         });
         
@@ -58,8 +63,14 @@ test('server upgrade to TLS', function (t) {
                 });
                 
                 tstream.on('secureConnection', function (sec) {
+console.log('SECURE');
                     t.ok(true, 'secure connection established');
-                    sec.write('quit\n');
+                    sec.pipe(concat(function (body) {
+                        console.log(body);
+                    }));
+                    sec.write('mail from: <beep@a.com>\n');
+                    sec.write('rcpt to: <boop@b.com>\n');
+                    sec.write('data\nbeep boop\n.\nquit\n')
                 });
             }
         ];

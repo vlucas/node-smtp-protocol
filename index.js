@@ -18,19 +18,36 @@ exports.createServer = function (opts, cb) {
     if (opts.key || opts.pfx) {
         tserver = tls.createServer(opts);
         tserver.on('secureConnection', function (sec) {
-            console.log('SECURE!');
+            var req = false;
+console.log('SCONN', sec);
+            //onstream(sec, req);
         });
     }
     
-    var server = net.createServer(function (stream) {
-        var req = proto.client(opts, stream);
-        req.on('_tlsNext', function (next) {
-            console.log('upgrade the stream here...');
+    var server = net.createServer(onstream);
+    var requests = {};
+    var seqNum = 0;
+    
+    function onstream (stream, existingReq) {
+        var req = existingReq || proto.client(opts, stream);
+        
+        req.on('_tlsNext', function (write) {
+            if (existingReq) {
+                return write(503, 'Bad sequence: already using TLS.');
+            }
             var s = net.connect(tserver.address().port, '127.0.0.1');
+            s.on('open', function () {
+console.log(s);
+console.log('--------------------------------------');
+            });
+            s.on('error', function (err) {});
+            
             stream.pipe(s).pipe(stream);
+            write(220, 'Ready to start TLS.');
+            req.emit('tls');
         });
-        cb(req);
-    });
+        if (!existingReq) cb(req);
+    }
     if (tserver) {
         server.on('listening', function () {
             tserver.listen(0, '127.0.0.1');
