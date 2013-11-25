@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var write = require('../lib/server/write');
+var write = require('../lib/write.js');
 var through = require('through');
 
 test('writes', function (t) {

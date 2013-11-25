@@ -13,7 +13,7 @@ var keys = {
 };
 
 test('server upgrade to TLS', function (t) {
-    t.plan(6);
+    t.plan(7);
     t.on('end', function () {
         server.close();
     });
@@ -51,13 +51,20 @@ test('server upgrade to TLS', function (t) {
         var stream = net.connect(server.address().port);
         
         var steps = [
-            function () {
+            function (line) {
+                t.equal(line, '220 beep');
                 stream.write('ehlo beep\n');
             },
-            function () {
+            function (line) {
+                t.equal(line, '250-beep');
+            },
+            function (line) {
+                t.equal(line, '250 STARTTLS');
                 stream.write('starttls\n');
             },
-            function () {
+            function (line) {
+                t.equal(line, '220 Ready to start TLS.');
+                
                 t.ok(true, 'secure connection established');
                 var sec = tls.connect({
                     servername: 'localhost',
@@ -82,9 +89,9 @@ test('server upgrade to TLS', function (t) {
         
         var ix = -1;
         stream.pipe(split()).on('data', function ondata (line) {
-            if (/^\d{3}(\s|$)/.test(line)) {
+            if (/^\d{3}([\s-]|$)/.test(line)) {
                 var f = steps[++ix];
-                if (f) return f()
+                if (f) return f(line)
                 this.removeListener('data', ondata);
             }
         });
