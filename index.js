@@ -23,7 +23,6 @@ exports.createServer = function (opts, cb) {
             
             var tserver = tls.createServer(opts);
             tserver.listen(0, '127.0.0.1', function () {
-console.log('LISTENING');
                 var s = net.connect(tserver.address().port, '127.0.0.1');
                 s.on('error', function (err) { stream.end() });
                 s.pipe(stream).pipe(s);
@@ -33,12 +32,10 @@ console.log('LISTENING');
             var index = 0;
             tserver.on('secureConnection', function (sec) {
                 if (index ++ > 0) return sec.end();
-                console.log('SECURE!!!');
-                
+                req._swapStream(sec);
                 req.emit('tls', sec);
             });
             stream.on('close', function () {
-                console.log('CLOSED');
                 tserver.close();
             });
         });

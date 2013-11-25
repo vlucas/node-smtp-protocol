@@ -14,6 +14,9 @@ var keys = {
 
 test('server upgrade to TLS', function (t) {
     t.plan(5);
+    t.on('end', function () {
+        server.close();
+    });
     
     var opts = {
         domain: 'beep',
@@ -22,7 +25,6 @@ test('server upgrade to TLS', function (t) {
     };
     var server = smtp.createServer(opts, function (req) {
         req.on('tls', function () {
-console.log('TLS');
             t.ok(true, 'upgraded to tls');
         });
         
@@ -38,7 +40,7 @@ console.log('TLS');
         
         req.on('message', function (stream, ack) {
             stream.pipe(concat(function (body) {
-                t.equal(body, 'oh hello');
+                t.equal(body, 'beep boop\r\n');
             }));
             ack.accept();
         });
@@ -56,22 +58,18 @@ console.log('TLS');
                 stream.write('starttls\n');
             },
             function () {
-                var tstream = tls.connect({
+                t.ok(true, 'secure connection established');
+                var sec = tls.connect({
                     servername: 'localhost',
                     socket: stream,
                     ca: keys.ca
                 });
-                
-                tstream.on('secureConnection', function (sec) {
-console.log('SECURE');
-                    t.ok(true, 'secure connection established');
-                    sec.pipe(concat(function (body) {
-                        console.log(body);
-                    }));
-                    sec.write('mail from: <beep@a.com>\n');
-                    sec.write('rcpt to: <boop@b.com>\n');
-                    sec.write('data\nbeep boop\n.\nquit\n')
-                });
+                sec.pipe(concat(function (body) {
+                    console.log('BODY=', body);
+                }));
+                sec.write('mail from: <beep@a.com>\n');
+                sec.write('rcpt to: <boop@b.com>\n');
+                sec.write('data\nbeep boop\n.\nquit\n')
             }
         ];
         
