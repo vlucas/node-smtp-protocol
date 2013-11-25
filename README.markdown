@@ -200,6 +200,10 @@ Emitted when the connection is reset from a `RSET` command.
 
 Emitted when the connection is closed from a `QUIT` command.
 
+### 'tls'
+
+Emitted when the connection is upgraded to TLS.
+
 properties
 ----------
 
