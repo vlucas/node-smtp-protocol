@@ -43,28 +43,35 @@ test('server upgrade to TLS', function (t) {
     });
     server.listen(0, function () {
         var stream = net.connect(server.address().port);
-        var ix = 0;
         
+        var steps = [
+            function () {
+                stream.write('ehlo beep\n');
+            },
+            function () {
+                stream.write('starttls\n');
+            },
+            function () {
+                var tstream = tls.connect({
+                    servername: 'beep',
+                    socket: stream
+                });
+                
+                tstream.on('secureConnection', function (sec) {
+                    t.ok(true, 'secure connection established');
+                    sec.write('quit\n');
+                });
+            }
+        ];
+        
+        var ix = -1;
         stream.pipe(split()).on('data', function ondata (line) {
-            ix ++;
-            if (ix === 1) {
-                return stream.write('ehlo beep\n');
+console.log('line=', line);
+            if (/^\d{3}(\s|$)/.test(line)) {
+                var f = steps[++ix];
+                if (f) f()
+                else this.removeListener('data', ondata)
             }
-            else if (ix === 2) {
-                return stream.write('starttls\n');
-            }
-            
-            t.ok(/^2\d\d\b/.test(line));
-            this.removeListener('data', ondata);
-            var tstream = tls.connect({
-                servername: 'beep',
-                socket: stream
-            });
-            
-            tstream.on('secureConnection', function (sec) {
-                t.ok(true, 'secure connection established');
-                sec.write('quit\n');
-            });
         });
     });
 });

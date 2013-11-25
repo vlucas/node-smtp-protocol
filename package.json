@@ -29,7 +29,8 @@
     "devDependencies" : {
         "tap" : "~0.4.4",
         "chunky" : "~0.0.0",
-        "seq" : "0.3.x"
+        "seq" : "0.3.x",
+        "concat-stream": "~1.2.0"
     },
     "license" : "MIT",
     "author" : {
