@@ -18,8 +18,7 @@ test('server upgrade to TLS', function (t) {
     var opts = {
         domain: 'beep',
         key: keys.key,
-        cert: keys.cert,
-        ca: keys.key
+        cert: keys.cert
     };
     var server = smtp.createServer(opts, function (req) {
         req.on('tls', function () {
@@ -53,8 +52,9 @@ test('server upgrade to TLS', function (t) {
             },
             function () {
                 var tstream = tls.connect({
-                    servername: 'beep',
-                    socket: stream
+                    servername: 'localhost',
+                    socket: stream,
+                    ca: keys.ca
                 });
                 
                 tstream.on('secureConnection', function (sec) {
@@ -66,11 +66,10 @@ test('server upgrade to TLS', function (t) {
         
         var ix = -1;
         stream.pipe(split()).on('data', function ondata (line) {
-console.log('line=', line);
             if (/^\d{3}(\s|$)/.test(line)) {
                 var f = steps[++ix];
-                if (f) f()
-                else this.removeListener('data', ondata)
+                if (f) return f()
+                this.removeListener('data', ondata);
             }
         });
     });

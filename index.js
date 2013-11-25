@@ -14,10 +14,32 @@ exports.createServer = function (opts, cb) {
         cb = opts;
         opts = {};;
     }
+    var tserver = false;
+    if (opts.key || opts.pfx) {
+        tserver = tls.createServer(opts);
+        tserver.on('secureConnection', function (sec) {
+            console.log('SECURE!');
+        });
+    }
     
-    return net.createServer(function (stream) {
-        cb(proto.client(opts, stream));
+    var server = net.createServer(function (stream) {
+        var req = proto.client(opts, stream);
+        req.on('_tlsNext', function (next) {
+            console.log('upgrade the stream here...');
+            var s = net.connect(tserver.address().port, '127.0.0.1');
+            stream.pipe(s).pipe(stream);
+        });
+        cb(req);
     });
+    if (tserver) {
+        server.on('listening', function () {
+            tserver.listen(0, '127.0.0.1');
+        });
+        server.on('close', function () {
+            tserver.close();
+        });
+    }
+    return server;
 };
 
 exports.connect = function () {
