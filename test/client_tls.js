@@ -4,6 +4,7 @@ var tls = require('tls');
 var split = require('split');
 var net = require('net');
 var fs = require('fs');
+var concat = require('concat-stream');
 
 var keys = {
     key: fs.readFileSync(__dirname + '/keys/key.pem'),
@@ -16,8 +17,6 @@ test('client TLS upgrade', function (t) {
         stream.write('220 beep\n');
         
         stream.pipe(split()).on('data', function ondata (line) {
-            line = line.trim();
-            
             if (/^EHLO\b/i.test(line)) {
                 stream.write('250-beep\n');
                 stream.write('250 STARTTLS\n');
@@ -33,10 +32,15 @@ test('client TLS upgrade', function (t) {
             };
             var tserver = tls.createServer(opts, function (s) {
                 stream.pipe(s).pipe(stream);
+                
             });
             tserver.listen(0, function () {
                 var s = net.connect(tserver.address().port);
                 s.pipe(stream).pipe(s);
+                
+                s.pipe(concat(function (body) {
+                    console.log(body.toString('utf8'));
+                }));
             });
             
             t.on('end', function () {
@@ -55,7 +59,12 @@ test('client TLS upgrade', function (t) {
             });
             
             r.on('tls', function () {
-                console.log('TLS!');
+                r.from('alice@beep');
+                r.to('bob@beep');
+                r.data(function (mail) {
+                    mail.end('beep boop!\n');
+                });
+                r.quit();
             });
         });
     });
