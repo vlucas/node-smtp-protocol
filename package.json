@@ -24,7 +24,8 @@
     },
     "dependencies" : {
         "through": "~2.3.4",
-        "stream-combiner": "0.0.2"
+        "stream-combiner": "~0.0.2",
+        "shallow-copy": "~0.0.1"
     },
     "devDependencies" : {
         "tap" : "~0.4.4",

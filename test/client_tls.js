@@ -11,23 +11,27 @@ var keys = {
     ca: fs.readFileSync(__dirname + '/keys/ca.pem')
 };
 
-return console.log('SKIP');
-
 test('client TLS upgrade', function (t) {
     var server = net.createServer(function (stream) {
         stream.write('220 beep\n');
         
         stream.pipe(split()).on('data', function ondata (line) {
-            if (line === 'EHLO beep') {
+            line = line.trim();
+            
+            if (/^EHLO\b/i.test(line)) {
                 stream.write('250-beep\n');
                 stream.write('250 STARTTLS\n');
             }
             
             if (line !== 'STARTTLS') return;
-            stream.removeListener('data', ondata);
+            this.removeListener('data', ondata);
             stream.write('220 Ready to start TLS.\n');
             
-            var tserver = tls.createServer(function (s) {
+            var opts = {
+                key: keys.key,
+                cert: keys.cert
+            };
+            var tserver = tls.createServer(opts, function (s) {
                 stream.pipe(s).pipe(stream);
             });
             tserver.listen(0, function () {
@@ -43,11 +47,11 @@ test('client TLS upgrade', function (t) {
     
     server.listen(0, function () {
         smtp.connect(server.address().port, function (r) {
-            r.ehlo();
+            r.ehlo('localhost');
             
             r.on('greeting', function (code, host) {
                 t.equal(code, 220);
-                r.startTLS();
+                r.startTLS({ ca: keys.ca });
             });
             
             r.on('tls', function () {
