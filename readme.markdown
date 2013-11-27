@@ -1,17 +1,14 @@
-smtp-protocol
-=============
+# smtp-protocol
 
-Implements the smtp protocol for clients and servers.
+write smtp clients and servers
 
 This module does not relay any messages or perform disk I/O by itself.
 
 [![build status](https://secure.travis-ci.org/substack/node-smtp-protocol.png)](http://travis-ci.org/substack/node-smtp-protocol)
 
-examples
-========
+# examples
 
-server
-------
+## server
 
 ``` js
 var smtp = require('smtp-protocol');
@@ -71,44 +68,19 @@ Beep boop.
 I am a computer.
 ```
 
-client
-------
+## client
 
 ``` js
-var smtp = require('../');
-var seq = require('seq');
+var smtp = require('smtp-protocol');
 var fs = require('fs');
 
-smtp.connect('localhost', 25, function (mail) {
-    seq()
-        .seq_(function (next) {
-            mail.on('greeting', function (code, lines) {
-                console.dir(lines);
-                next();
-            });
-        })
-        .seq(function (next) {
-            mail.helo('localhost', this.into('helo'));
-        })
-        .seq(function () {
-            mail.from('substack', this.into('from'));
-        })
-        .seq(function () {
-            mail.to('root', this.into('to'));
-        })
-        .seq(function () {
-            mail.data(this.into('data'))
-        })
-        .seq(function () {
-            mail.message(fs.createReadStream('/etc/issue'), this.into('message'));
-        })
-        .seq(function () {
-            mail.quit(this.into('quit'));
-        })
-        .seq(function () {
-            console.dir(this.vars);
-        })
-    ;
+smtp.connect('localhost', 9025, function (mail) {
+    mail.helo('example.com');
+    mail.from('substack@example.com');
+    mail.to('root@example.com');
+    mail.data();
+    fs.createReadStream('/etc/issue').pipe(mail.message());
+    mail.quit();
 });
 ```
 
@@ -125,23 +97,19 @@ $ node example/client.js
   quit: 221 }
 ```
 
-server methods
-==============
+# server methods
 
 var smtp = require('smtp-protocol')
 
-smtp.createServer(domain=os.hostname(), cb)
--------------------------------------------
+## smtp.createServer(domain=os.hostname(), cb)
 
 Return a new `net.Server` so you can `.listen()` on a port.
 
 `cb(req)` fires for new connection. See the "requests" section below.
 
-server requests
-===============
+# server requests
 
-events
-------
+## events
 
 Every event that can 
 
@@ -204,8 +172,7 @@ Emitted when the connection is closed from a `QUIT` command.
 
 Emitted when the connection is upgraded to TLS.
 
-properties
-----------
+## properties
 
 ### req.from
 
@@ -231,8 +198,7 @@ The greeting command. One of `'helo'`, `'ehlo'`, or `'lhlo'`.
 
 The hostname specified in the greeting.
 
-server acknowledgements
-=======================
+# server acknowledgements
 
 Many request events have a trailing `ack` parameter.
 
@@ -242,23 +208,19 @@ MUST call either `ack.accept()` or `ack.reject()`.
 Consult [this handy list of SMTP codes](http://www.greenend.org.uk/rjk/2000/05/21/smtp-replies.html#SEND)
 for which codes to use in acknowledgement responses.
 
-ack.accept(code=250, message)
------------------------------
+## ack.accept(code=250, message)
 
 Accept the command. Internal staged state modifications from the command are executed.
 
-ack.reject(code, message)
--------------------------
+## ack.reject(code, message)
 
 Reject the command. Any staged state modifications from the command are discarded.
 
-client methods
-==============
+# client methods
 
 For all `client` methods, `cb(err, code, lines)` fires with the server response.
 
-var stream = smtp.connect(host='localhost', port=25, options={}, cb)
---------------------------------------------------------------------
+## var stream = smtp.connect(host='localhost', port=25, options={}, cb)
 
 Create a new SMTP client connection.
 
@@ -282,36 +244,31 @@ stream.on('secure', function (ack) {
 })
 ```
 
-client.helo(hostname, cb)
------------------------
+## client.helo(hostname, cb)
 
 Greet the server with the `hostname` string.
 
 `cb(err, code, lines)` fires with the server response.
 
-client.from(addr, ext=undefined, cb)
-------------------------------------
+## client.from(addr, ext=undefined, cb)
 
 Set the sender to the email address `addr` with optional extension data `ext`.
 
 `cb(err, code, lines)` fires with the server response.
 
-client.to(addr, ext=undefined, cb)
-----------------------------------
+## client.to(addr, ext=undefined, cb)
 
 Set the recipient to the email address `addr` with optional extension data `ext`.
 
 `cb(err, code, lines)` fires with the server response.
 
-client.data(cb)
----------------
+## client.data(cb)
 
 Tell the server that we are about to transmit data.
 
 `cb(err, code, lines)` fires with the server response.
 
-var stream = client.message(cb)
--------------------------------
+## var stream = client.message(cb)
 
 Return a writable stream to send data to the server in a message body.
 For example, you could do:
@@ -322,32 +279,33 @@ fs.createReadStream('foo.txt').pipe(client.message());
 
 `cb(err, code, lines)` fires with the server response.
 
-client.quit(cb)
----------------
+## client.quit(cb)
 
 Ask the server to sever the connection.
 
 `cb(err, code, lines)` fires with the server response.
 
-client.reset(cb)
-----------------
+## client.reset(cb)
 
 Ask the server to reset the connection.
 
 `cb(err, code, lines)` fires with the server response.
 
-client events
-=============
+# client events
 
-'greeting', code, lines
------------------------
+## 'greeting', code, lines
 
 Fired when the stream initializes. This should be the first message that the
 server sends.
 
-install
-=======
+# install
 
 With [npm](http://npmjs.org) do:
 
-    npm install smtp-protocol
+```
+npm install smtp-protocol
+```
+
+# license
+
+MIT
