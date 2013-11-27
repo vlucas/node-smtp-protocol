@@ -31,7 +31,8 @@
         "tap" : "~0.4.4",
         "chunky" : "~0.0.0",
         "seq" : "0.3.x",
-        "concat-stream": "~1.2.0"
+        "concat-stream": "~1.2.0",
+        "split": "~0.2.10"
     },
     "license" : "MIT",
     "author" : {
