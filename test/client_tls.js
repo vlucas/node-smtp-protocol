@@ -16,11 +16,14 @@ test('client TLS upgrade', function (t) {
     var server = net.createServer(function (stream) {
         stream.write('220 beep\n');
         
-        stream.pipe(split()).on('data', function ondata (line) {
+        stream.pipe(split()).on('data', ondata);
+        
+        function ondata (line) {
             if (/^EHLO\b/i.test(line)) {
                 stream.write('250-beep\n');
                 stream.write('250 STARTTLS\n');
             }
+            console.log(line);
             
             if (line !== 'STARTTLS') return;
             this.removeListener('data', ondata);
@@ -37,6 +40,7 @@ test('client TLS upgrade', function (t) {
             tserver.listen(0, function () {
                 var s = net.connect(tserver.address().port);
                 s.pipe(stream).pipe(s);
+                s.on('data', ondata);
                 
                 s.pipe(concat(function (body) {
                     console.log(body.toString('utf8'));
@@ -46,7 +50,7 @@ test('client TLS upgrade', function (t) {
             t.on('end', function () {
                 tserver.close();
             });
-        });
+        }
     });
     
     server.listen(0, function () {
@@ -61,9 +65,8 @@ test('client TLS upgrade', function (t) {
             r.on('tls', function () {
                 r.from('alice@beep');
                 r.to('bob@beep');
-                r.data(function (mail) {
-                    mail.end('beep boop!\n');
-                });
+                r.data();
+                r.message().end('beep boop!\n');
                 r.quit();
             });
         });
