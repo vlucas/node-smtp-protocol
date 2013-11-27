@@ -13,6 +13,9 @@ var keys = {
 };
 
 test('client TLS upgrade', function (t) {
+    t.plan(2);
+    t.on('end', function () { server.close() });
+    
     var server = net.createServer(function (stream) {
         stream.write('220 beep\n');
         
@@ -23,7 +26,6 @@ test('client TLS upgrade', function (t) {
                 stream.write('250-beep\n');
                 stream.write('250 STARTTLS\n');
             }
-            console.log(line);
             
             if (line !== 'STARTTLS') return;
             this.removeListener('data', ondata);
@@ -34,21 +36,28 @@ test('client TLS upgrade', function (t) {
                 cert: keys.cert
             };
             var tserver = tls.createServer(opts, function (s) {
-                stream.pipe(s).pipe(stream);
-                
+                s.pipe(concat(function (body) {
+                    t.deepEqual(body.toString('utf8').split(/\r?\n/), [
+                        'MAIL FROM: <alice@beep>',
+                        'RCPT TO: <bob@beep>',
+                        'DATA',
+                        'beep boop!',
+                        '',
+                        '.',
+                        'QUIT',
+                        ''
+                    ]);
+                }));
+                s.pipe(split()).on('data', function (line) {
+                    if (/^quit\b/i.test(line)) s.end();
+                });
             });
+            
+            t.on('end', function () { tserver.close() });
+            
             tserver.listen(0, function () {
                 var s = net.connect(tserver.address().port);
                 s.pipe(stream).pipe(s);
-                s.on('data', ondata);
-                
-                s.pipe(concat(function (body) {
-                    console.log(body.toString('utf8'));
-                }));
-            });
-            
-            t.on('end', function () {
-                tserver.close();
             });
         }
     });
