@@ -39,33 +39,19 @@ test('client/server', function (t) {
         var script = '';
         var c = smtp.connect(port, sendData);
         
-        var _write = c.write;
-        c.write = function (buf) {
-            script += buf;
-            _write.apply(c, arguments);
-        };
-        
+        var script = '';
         c.on('data', function (buf) { script += buf });
         
         c.on('end', function () {
             t.equal(script, [
                 '220 localhost',
-                'HELO localhost',
                 '250 localhost',
-                'MAIL FROM: <beep@localhost>',
                 '250',
-                'RCPT TO: <boop@example.com>',
                 '553-Recipients must be on these domains:',
                 '553 localhost',
-                'RCPT TO: <boop@localhost>',
                 '250',
-                'DATA',
                 '354',
-                'Beep boop.',
-                '....I am a computer.',
-                '.',
                 '250',
-                'QUIT',
                 '221 Bye!',
                 ''
             ].join('\r\n'));
