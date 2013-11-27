@@ -2,8 +2,8 @@ var smtp = require('../');
 
 var server = smtp.createServer(function (req) {
     req.on('to', function (to, ack) {
-        var domain = to.split('@')[1] || 'localhost';
-        if (domain === 'localhost') ack.accept()
+        var domain = to.split('@')[1] || 'example.com';
+        if (domain === 'example.com') ack.accept()
         else ack.reject()
     });
     
