@@ -170,7 +170,7 @@ Emitted when the connection is closed from a `QUIT` command.
 
 ### 'tls'
 
-Emitted when the connection is upgraded to TLS.
+Emitted when the connection is upgraded to TLS by the client.
 
 ## properties
 
@@ -232,7 +232,9 @@ You can use unix sockets by supplying a string argument that matches `/^[.\/]/`.
 Alternatively supply your own stream as `opts.stream` (the stream must already be connected).
 
 To make a connection using TLS, set `opts.tls` to `true` (for more control you can also assign
-options to pass through to `tls.connect`.)
+options to pass through to `tls.connect`.) You can also upgrade the connection
+to TLS at any time by calling `client.startTLS()`.
+
 By default, connections to unauthorized servers will be closed and the error
 will be emitted as an `'error'` event on the stream object but you can provide
 your own authorization logic by doing:
@@ -291,12 +293,28 @@ Ask the server to reset the connection.
 
 `cb(err, code, lines)` fires with the server response.
 
+## client.startTLS(opts={}, cb)
+
+Upgrade the current connection to TLS with `opts` passed through to
+`tls.connect(opts)`.
+
+If `opts.servername` isn't given, its value will be taken from the HELO/EHLO
+hostname value because otherwise the TLS library will complain about how the
+certificate name doesn't match.
+
+You'll probably want to pass in the `opts.ca` here as well to satisfy the TLS
+machinery.
+
 # client events
 
 ## 'greeting', code, lines
 
 Fired when the stream initializes. This should be the first message that the
 server sends.
+
+## 'tls', clearTextStream
+
+When the connection is upgraded to TLS, this event fires.
 
 # install
 
