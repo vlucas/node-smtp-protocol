@@ -17,6 +17,8 @@ exports.createServer = function (opts, cb) {
     
     return net.createServer(function (stream) {
         var req = proto.client(opts, stream);
+        req.on('error', function () {});
+        stream.on('error', function (err) {});
         
         req.on('_tlsNext', function (write) {
             //return write(503, 'Bad sequence: already using TLS.');
