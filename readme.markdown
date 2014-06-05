@@ -198,6 +198,11 @@ The greeting command. One of `'helo'`, `'ehlo'`, or `'lhlo'`.
 
 The hostname specified in the greeting.
 
+### req.socket
+
+The underlying tcp socket. This is handy if you need to verify the address of
+the remote host with `req.socket.remoteAddress`.
+
 # server acknowledgements
 
 Many request events have a trailing `ack` parameter.
