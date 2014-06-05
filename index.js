@@ -55,16 +55,16 @@ exports.connect = function () {
     var cb = args.function;
     var options = args.object || {};
     
-    var port = args.number || 25;
-    var host = args.string || 'localhost';
     var tlsOpts = options.tls;
+    options.port = args.number || 25;
+    options.host = args.string || 'localhost';
     
     if (args.string && args.string.match(/^[.\/]/)) {
         // unix socket
         stream = net.createConnection(args.string);
     }
     else if (tlsOpts) {
-        stream = tls.connect(port, host, tlsOpts, function () {
+        stream = tls.connect(options.port, options.host, tlsOpts, function () {
             var pending = stream.listeners('secure').length;
             var allOk = true;
             if (pending === 0 && !stream.authorized
@@ -98,7 +98,7 @@ exports.connect = function () {
         cb(proto.server(options.stream));
     }
     else {
-        stream = net.connect(port, host);
+        stream = net.connect(options);
         stream.on('connect', function () {
             cb(proto.server(stream));
         });
