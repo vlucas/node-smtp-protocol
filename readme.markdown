@@ -184,11 +184,11 @@ Extended sender data if sent as a string.
 
 ### req.to
 
-The email address of the recipient as a string.
+Array of the email addresses of the recipients as a string.
 
 ### req.toExt
 
-Extended recipient data if sent as a string.
+Array of extended recipient data if sent as a string.
 
 ### req.greeting
 
