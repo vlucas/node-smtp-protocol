@@ -21,7 +21,7 @@ test('bad sequence', function (t) {
         
         req.on('message', function (stream, ack) {
             t.equal(req.from, 'beep@localhost');
-            t.equal(req.to, 'boop@localhost');
+            t.deepEqual(req.to, [ 'boop@localhost' ]);
             
             var data = '';
             stream.on('data', function (buf) { data += buf });
