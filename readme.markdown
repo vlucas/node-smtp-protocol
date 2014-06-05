@@ -305,6 +305,12 @@ certificate name doesn't match.
 You'll probably want to pass in the `opts.ca` here as well to satisfy the TLS
 machinery.
 
+## client.verify(username, cb)
+
+Send a VRFY for `username`.
+
+`cb(err, code, lines)` fires with the server response.
+
 # client events
 
 ## 'greeting', code, lines
