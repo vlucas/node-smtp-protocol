@@ -13,7 +13,7 @@ var keys = {
 };
 
 test('server upgrade to TLS', function (t) {
-    t.plan(7);
+    t.plan(10);
     t.on('end', function () {
         server.close();
     });
@@ -73,6 +73,8 @@ test('server upgrade to TLS', function (t) {
                 });
                 sec.pipe(concat(function (body) {
                     t.deepEqual(body.toString('utf8').split(/\r?\n/), [
+                        '250-beep',
+                        '250 STARTTLS',
                         '250',
                         '250',
                         '354',
@@ -81,6 +83,7 @@ test('server upgrade to TLS', function (t) {
                         ''
                     ]);
                 }));
+                sec.write('ehlo beep\n');
                 sec.write('mail from: <beep@a.com>\n');
                 sec.write('rcpt to: <boop@b.com>\n');
                 sec.write('data\nbeep boop\n.\nquit\n')
