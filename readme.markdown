@@ -316,6 +316,12 @@ Send a VRFY for `username`.
 
 `cb(err, code, lines)` fires with the server response.
 
+## client.login(username, password, authType, cb)
+
+Login with the given username and password. `authType` can be one of `PLAIN`, `LOGIN` and `CRAM-MD5`.
+
+`cb(err, code, lines)` fires with the server response.
+
 # client events
 
 ## 'greeting', code, lines
