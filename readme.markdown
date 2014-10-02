@@ -101,9 +101,15 @@ $ node example/client.js
 
 var smtp = require('smtp-protocol')
 
-## smtp.createServer(domain=os.hostname(), cb)
+## smtp.createServer(opts, cb)
 
 Return a new `net.Server` so you can `.listen()` on a port.
+
+Optionally:
+
+* `opts.domain` - domain to use in hello message
+* `opts.tls` - listen on TLS at the start instead of upgrading with STARTTLS
+* `opts.key`, `opts.cert`, `opts.pfx` - configure tls
 
 `cb(req)` fires for new connection. See the "requests" section below.
 
