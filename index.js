@@ -14,6 +14,7 @@ exports.createServer = function (opts, cb) {
         cb = opts;
         opts = {};;
     }
+    if (!opts) opts = {};
     var istls = Boolean(opts.tls);
     var tnet = istls ? tls : net;
     
