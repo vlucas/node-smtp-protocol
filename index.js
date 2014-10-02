@@ -23,8 +23,12 @@ exports.createServer = function (opts, cb) {
         req.on('error', function () {});
         stream.on('error', function (err) {});
         
-        req.on('_tlsNext', function (write) {
-            if (istls) return write(503, 'Bad sequence: already using TLS.');
+        req.on('_tlsNext', function (write, next) {
+            if (istls) {
+                write(220, 'Already using TLS?');
+                //write(503, 'Bad sequence: already using TLS.');
+                return next();
+            }
             istls = true;
             
             var tserver = tls.createServer(opts);
