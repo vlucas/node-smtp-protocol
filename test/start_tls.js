@@ -75,10 +75,10 @@ test('server upgrade to TLS', function (t) {
                     t.deepEqual(body.toString('utf8').split(/\r?\n/), [
                         '250-beep',
                         '250 STARTTLS',
-                        '250',
-                        '250',
-                        '354',
-                        '250',
+                        '250 OK',
+                        '250 OK',
+                        '354 OK',
+                        '250 OK',
                         '221 Bye!',
                         ''
                     ]);

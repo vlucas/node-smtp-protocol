@@ -46,12 +46,12 @@ test('client/server', function (t) {
             t.equal(script, [
                 '220 localhost',
                 '250 localhost',
-                '250',
+                '250 OK',
                 '553-Recipients must be on these domains:',
                 '553 localhost',
-                '250',
-                '354',
-                '250',
+                '250 OK',
+                '354 OK',
+                '250 OK',
                 '221 Bye!',
                 ''
             ].join('\r\n'));
