@@ -19,9 +19,9 @@ exports.createServer = function (opts, cb) {
     var tnet = istls ? tls : net;
     
     return tnet.createServer(opts, function (stream) {
-        var req = proto.client(opts, stream),
-      clienttls = istls;
-
+        var req = proto.client(opts, stream);
+        var clienttls = istls;
+        
         req.on('error', function () {});
         stream.on('error', function (err) {});
         
