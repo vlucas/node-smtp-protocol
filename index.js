@@ -19,17 +19,19 @@ exports.createServer = function (opts, cb) {
     var tnet = istls ? tls : net;
     
     return tnet.createServer(opts, function (stream) {
-        var req = proto.client(opts, stream);
+        var req = proto.client(opts, stream),
+      clienttls = istls;
+
         req.on('error', function () {});
         stream.on('error', function (err) {});
         
         req.on('_tlsNext', function (write, next) {
-            if (istls) {
+            if (clienttls) {
                 write(220, 'Already using TLS?');
                 //write(503, 'Bad sequence: already using TLS.');
                 return next();
             }
-            istls = true;
+            clienttls = true;
             
             var tserver = tls.createServer(opts);
             tserver.listen(0, '127.0.0.1', function () {
